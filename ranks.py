@@ -38,25 +38,130 @@ def get_average_ranks(data_lists):
     feature_averages.sort()
     return feature_averages, feature_locations
 
-full_averages, feature_locations = get_average_ranks(full)
+full_averages, full_feature_locations = get_average_ranks(full)
 print("Full Averages")
 for item in full_averages:
     print(item)
 
-full_averages_removed = [item for item in full_averages if
-                         ('dkg_3' in item[1] or 'rkg_3' in item[1]) or
-                         ('_1' not in item[1] and '_2' not in item[1] and
-                          '_3' not in item[1])]
+def remove_thirds(averages_list):
+    return [item for item in averages_list if
+                            ('dkg_2' in item[1] or 'rkg_2' in item[1] or
+                            'dkg_3' in item[1] or 'rkg_3' in item[1]) or
+                            ('_1' not in item[1] and '_2' not in item[1] and
+                            '_3' not in item[1])]
 
+def keep_thirds(averages_list):
+    not_thirds = [item[1] for item in remove_thirds(averages_list)]
+    return [item for item in averages_list if item[1] not in not_thirds]
 
+reg_illumina_averages, reg_illumina_locations = get_average_ranks(reg_illumina)
+bs_illumina_averages, bs_illumina_locations = get_average_ranks(bs_illumina)
+reg_averages, reg_locations = get_average_ranks(reg_illumina + reg_ion_torrent)
 
-plt.boxplot([feature_locations[item[1]] for item in full_averages_removed],
-            notch=True, labels=[item[1] for item in full_averages_removed],
-            )
-plt.xticks(rotation=45)
-plt.title('Median and Variance for Random Forest Feature Importance Ranks')
-plt.xlabel('Feature')
-plt.ylabel('Random Forest Importance Rank')
-plt.tight_layout()
+full_averages_removed = remove_thirds(full_averages)
+full_averages_thirds = keep_thirds(full_averages)
 
-plt.show()
+reg_illumina_removed = remove_thirds(reg_illumina_averages)
+bs_illumina_removed = remove_thirds(bs_illumina_averages)
+reg_removed = remove_thirds(reg_averages)
+
+import scipy.stats as stats
+
+kendall_tau_list = [l1, l2, l3, l4, l6, l7, l8, l9, l10, l11]
+kendall_tau_comparison = l5
+
+kendall_tau_bispin = [l2, l6, l11]
+self_comparisons = []
+other_comparisons = []
+stack = []
+for i, l0 in enumerate(kendall_tau_list):
+    if i % 2 == 1:
+        tau2, p_value2 = stats.kendalltau(l0, kendall_tau_comparison)
+        tau1, p_value1 = stack.pop()
+        tau_avg = (tau1 + tau2) / 2
+        p_value_avg = (p_value1 +  p_value2) / 2
+        other_comparisons.append((tau_avg, p_value_avg))
+    else:
+        tau, p_value = stats.kendalltau(l0, kendall_tau_list[i+1])
+        tau1, p_value1 = stats.kendalltau(l0, kendall_tau_comparison)
+        stack.append((tau1, p_value1))
+        self_comparisons.append((tau, p_value))
+
+print('BisPin kt comparison')
+for i, l0 in enumerate(kendall_tau_bispin):
+    tau, p_value = stats.kendalltau(l0, kendall_tau_comparison)
+    print(tau, p_value)
+
+print('Self comparisons')
+for item in self_comparisons:
+    print(item)
+
+print('Other comparisons')
+for item in other_comparisons:
+    print(item)
+
+plot_selector = 2
+
+if plot_selector == 0:
+
+    plt.boxplot([full_feature_locations[item[1]] for item in full_averages_removed],
+                notch=True, labels=[item[1] for item in full_averages_removed],
+                )
+    plt.xticks(rotation=45)
+    plt.title('Median and Variance for Random Forest Feature Importance Ranks on All Data')
+    plt.xlabel('Feature')
+    plt.ylabel('Random Forest Importance Rank')
+    plt.tight_layout()
+
+    plt.show()
+
+elif plot_selector == 1:
+
+    plt.boxplot([reg_illumina_locations[item[1]] for item in reg_illumina_removed],
+                notch=True, labels=[item[1] for item in reg_illumina_removed],
+                )
+    plt.xticks(rotation=45)
+    plt.title('Median and Variance for Random Forest Feature Importance Ranks on Regular Illumina')
+    plt.xlabel('Feature')
+    plt.ylabel('Random Forest Importance Rank')
+    plt.tight_layout()
+
+    plt.show()
+
+elif plot_selector == 2:
+
+    plt.boxplot([bs_illumina_locations[item[1]] for item in bs_illumina_removed],
+                notch=True, labels=[item[1] for item in bs_illumina_removed],
+                )
+    plt.xticks(rotation=45)
+    plt.title('Median and Variance for Random Forest Feature Importance Ranks on BS Illumina')
+    plt.xlabel('Feature')
+    plt.ylabel('Random Forest Importance Rank')
+    plt.tight_layout()
+
+    plt.show()
+
+elif plot_selector == 3:
+    plt.boxplot([full_feature_locations[item[1]] for item in full_averages_thirds],
+                notch=True, labels=[item[1] for item in full_averages_thirds],
+                )
+    plt.xticks(rotation=45)
+    plt.title('Median and Variance for Random Forest Feature Importance Ranks on Thirds Features')
+    plt.xlabel('Feature')
+    plt.ylabel('Random Forest Importance Rank')
+    plt.tight_layout()
+
+    plt.show()
+
+elif plot_selector == 4:
+    plt.boxplot([reg_locations[item[1]] for item in reg_removed],
+                notch=True, labels=[item[1] for item in reg_removed],
+                )
+    plt.xticks(rotation=45)
+    plt.title('Median and Variance for Random Forest Feature Importance Ranks on Regular Reads')
+    plt.xlabel('Feature')
+    plt.ylabel('Random Forest Importance Rank')
+    plt.tight_layout()
+
+    plt.show()
+

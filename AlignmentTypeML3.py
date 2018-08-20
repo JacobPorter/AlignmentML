@@ -50,20 +50,23 @@ class RandomClassifier(BaseEstimator, ClassifierMixin):
         freq = {key : counts[key] / total for key in counts}
         keys = list(freq.keys())
         keys.sort()
-        self.freq_list = []
+        self.freq_dict = {}
         s = 0.0
         for k in keys:
-            self.freq_list.append(s + freq[k])
+            self.freq_dict[k] = s + freq[k]
             s += freq[k]
+        print("self.freq_dict {}".format(self.freq_dict))
         return self
 
     def predict(self, X, y=None):
         def random_class(rand_n):
             s = 0.0
-            for i in range(len(self.freq_list)):
-                if rand_n >= s and rand_n < self.freq_list[i]:
-                    return i + 0.0
-                s = self.freq_list[i]
+            labels = list(self.freq_dict.keys())
+            labels.sort()
+            for k in labels:
+                if rand_n >= s and rand_n < self.freq_dict[k]:
+                    return k
+                s = self.freq_dict[k]
         if self.seed != None:
             np.random.seed(self.seed)
         samples = np.random.rand(X.shape[0])
