@@ -65,7 +65,7 @@ def main():
     p.add_option('--n_jobs', '-n', help='The number of jobs (parallel processes) to use to do machine learning. [default: %default]', default='4')
     p.add_option('--datasize', '-s', help='The number of rows of the data to do machine learning. [default: %default]', default=None)
     p.add_option('--testsize', '-t', help='The number of rows of the data to calculate test set error. [default: %default]', default=100000)
-    p.add_option('--classifier', '-c', help='Specify the classifier to use.  Choices are "RF", "LR", "MLP", "SVC", "Ensemble", "Random".  [default: %default]', default='RF')
+    p.add_option('--classifier', '-c', help='Specify the classifier to use.  Choices are "RF", "GB", "LR", "MLP", "SVC", "Ensemble", "Random".  [default: %default]', default='RF')
     p.add_option('--write_data', '-w', help='Write the training and the test data to a file with prefix given in this option. [default: %default]', default=None)
     p.add_option('--bayesOpt', '-b', help='Use Bayesian optimization.', action='store_true', default=False)
     p.add_option('--acqFunc', '-a', help='Choose the aquisition function for Bayesian optimization.  The bayesOpt parameter must be True. Choices are "LCB", "EI", "PI", "gp_hedge".  [default: %default]', default="gp_hedge")

@@ -13,6 +13,7 @@ from collections import Counter
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import LinearSVC, SVC
 #from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
@@ -184,12 +185,17 @@ def getPipeRF():
                   ('rf', rf)]
     return Pipeline(estimators)
 
+def getPipeGB():
+    gb = GradientBoostingClassifier()
+    estimators = [('scaler', preprocessing.StandardScaler(copy=True, with_mean=True, with_std=True)),
+                  ('gb', gb)]
+    return Pipeline(estimators)
+
 def getPipeEnsemble():
     ens = EnsembleClassifier()
     estimators = [('scaler', preprocessing.StandardScaler(copy=True, with_mean=True, with_std=True)),
                   ('ens', ens)]
     return Pipeline(estimators)
-
 
 def getPipeSVC():
     #svc = svm.SVC()
@@ -323,6 +329,10 @@ def doML(X, y_dict, n_jobs, classifier, datasize=None, testsize=100000, write_da
         result_rf = doRandomForest(X_train, y_train, X_test, y_test, n_jobs, feature_labels, class_labels, bayesOpt, acqFunc, num_iter)
         sys.stdout.write("Finished with random forest.\n")
         sys.stdout.flush()
+    if 'GB' in classifier:
+        result_gb = doGradBoost(X_train, y_train, X_test, y_test, n_jobs, feature_labels, class_labels, bayesOpt, acqFunc, num_iter)
+        sys.stdout.write("Finished with grad boost.\n")
+        sys.stdout.flush()
     if 'MLP' in classifier:
         result_mlp = doMLP(X_train, y_train, X_test, y_test, n_jobs, feature_labels, class_labels, bayesOpt, acqFunc, num_iter)
         sys.stdout.write("Finished with MLP.\n")
@@ -424,6 +434,40 @@ def doRandomForest(X, y, X_test, y_test, n_jobs, feature_labels, class_labels, b
         print("How to get the feature importances for RF?")
     return best_estimator
 
+def doGradBoost(X, y, X_test, y_test, n_jobs, feature_labels, class_labels, bayesOpt = False, acqFunc = '', num_iter = 25):
+#     MIN_SEARCH = 2e-12
+#     num_features = 67
+#     search_space = {
+#         'gb__n_estimators': Integer(50, 150),
+#         'gb__max_features': Real(MIN_SEARCH, 1.0, prior='uniform'),
+#         'gb__criterion': Categorical(['friedman_mse',
+#                                              'mse']),  # mae is very slow.
+#         'gb__min_samples_split': Real(MIN_SEARCH,
+#                                              1.0,
+#                                              prior='log-uniform'),
+#         'gb__min_samples_leaf': Real(MIN_SEARCH,
+#                                             0.5,
+#                                             prior='log-uniform'),
+#         'gb__max_depth': Integer(2, num_features),
+#     }
+    search_space = {'rf__max_depth': Integer(1, 55), "rf__max_features": Real(.05, 1.0, prior='log-uniform')}
+    parameters = {'gb__max_depth': [i for i in range(5, 60, 5)], "gb__max_features": [i/10.0 for i in range(1, 11)]}
+    best_estimator = executeML(X, y, X_test, y_test, n_jobs, feature_labels, class_labels, getPipeRF(), parameters, "GB" + acqFunc, bayesOpt = bayesOpt, search_space = search_space, n_iter = num_iter, acq_func = acqFunc)
+    try:
+        imp = best_estimator.named_steps['gb'].feature_importances_
+        feature_importances = sorted(zip(feature_labels, imp), key=lambda fi: fi[1], reverse=True)
+        print("")
+        print("Grad boost feature importances.")
+        i = 1
+        for item in feature_importances:
+            print(i, str(item))
+            i += 1
+        print("")
+        sys.stdout.flush()
+    except AttributeError:
+        print("How to get the feature importances for GB?")
+    return best_estimator
+
 def doLogisticRegression(X, y, X_test, y_test, n_jobs, feature_labels, class_labels, bayesOpt = False, acqFunc = '', num_iter = 25):
     #Best: 'lr__C': 0.74
     search_space = {"lr__C": Real(.001, 1.0, prior='log-uniform')}
@@ -490,8 +534,6 @@ def doMLP(X, y, X_test, y_test, n_jobs, feature_labels, class_labels, bayesOpt =
         print("How to get the feature importances for MLP?")
     return best_estimator
 
-
-
 def convertLine(line, func, first = True, last = False):
     line = line.replace("]", "")
     line = line.replace("'", "")
@@ -516,7 +558,6 @@ def extractY(line, Y_dict):
     line = line.replace("\n", "")
     line = line.split(",")
     Y_dict[str(line[0])] = (line[1], line[2])
-
 
 # Need to process X and Y at the same time to match them up.
 # Missing ids in y should be marked as unmapped.
@@ -559,7 +600,7 @@ def main():
     p.add_option('--n_jobs', '-n', help='The number of jobs (parallel processes) to use to do machine learning. [default: %default]', default='4')
     p.add_option('--datasize', '-s', help='The number of rows of the data to do machine learning. [default: %default]', default=None)
     p.add_option('--testsize', '-t', help='The number of rows of the data to calculate test set error. [default: %default]', default=100000)
-    p.add_option('--classifier', '-c', help='Specify the classifier to use.  Choices are "RF", "LR", "MLP", "SVC", "Ensemble", "Random".  [default: %default]', default='RF')
+    p.add_option('--classifier', '-c', help='Specify the classifier to use.  Choices are "RF", "GB", "LR", "MLP", "SVC", "Ensemble", "Random".  [default: %default]', default='RF')
     p.add_option('--write_data', '-w', help='Write the training and the test data to a file with prefix given in this option. [default: %default]', default=None)
     p.add_option('--bayesOpt', '-b', help='Use Bayesian optimization.', action='store_true', default=False)
     p.add_option('--acqFunc', '-a', help='Choose the aquisition function for Bayesian optimization.  The bayesOpt parameter must be True. Choices are "LCB", "EI", "PI", "gp_hedge".  [default: %default]', default="gp_hedge")
