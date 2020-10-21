@@ -11,4 +11,4 @@ fastq_dict = SeqIterator(open("fastq_file"), file_type='fastq').convertToDict()
 
 for seq_id in fastq_dict:
     if seq_id not in labels_dict:
-        print("{}, {}, {}".format(seq_id, 3, 'Unmap'))
+        print(("{}, {}, {}".format(seq_id, 3, 'Unmap')))

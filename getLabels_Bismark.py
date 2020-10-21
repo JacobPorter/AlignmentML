@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """Make the machine learning labels for Bismark"""
-from __future__ import print_function
+
 
 import datetime
 import sys

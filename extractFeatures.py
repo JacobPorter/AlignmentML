@@ -93,7 +93,7 @@ def kmer_freq(vector, k):
 
 
 def dkg(cnt, k, len_g):
-    return len(cnt.keys()) / (len_g - k + 1.0)
+    return len(list(cnt.keys())) / (len_g - k + 1.0)
 
 
 def rkg(cnt, k, len_g):
@@ -130,7 +130,7 @@ def extractFeatureRow(fastq_record, subportions=3):
     if "N" in seq_seq:
         return None
     seq_qual = fastq_record[2]
-    seq_qual_prob = map(transformPhredCharToProb, seq_qual)
+    seq_qual_prob = list(map(transformPhredCharToProb, seq_qual))
     f1 = [seq_id] + dna_seq_features(seq_seq) + quality_features(seq_qual_prob)
     sublength = len(seq_seq) / subportions
     f2 = []
@@ -171,7 +171,7 @@ def extractFeatures(FASTQ_file):
                          "freq_T_3", "qual_mean_3", "qual_max_3",
                          "qual_min_3", "qual_variance_3", "qual_skewness_3",
                          "qual_kurt_3", "qual_mean_diff_3"]
-    print feature_labels + partition1_labels + partition2_labels + partition3_labels
+    print(feature_labels + partition1_labels + partition2_labels + partition3_labels)
     noNs = 0
     total = 0
     for fastq_record in fastq_iter:

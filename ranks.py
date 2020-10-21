@@ -90,7 +90,7 @@ for i, l0 in enumerate(kendall_tau_list):
 print('BisPin kt comparison')
 for i, l0 in enumerate(kendall_tau_bispin):
     tau, p_value = stats.kendalltau(l0, kendall_tau_comparison)
-    print(tau, p_value)
+    print((tau, p_value))
 
 print('Self comparisons')
 for item in self_comparisons:
