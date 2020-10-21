@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-
 """Make the machine learning labels for Bismark"""
 
-
+import argparse
 import datetime
 import sys
-import argparse
+
 from SeqIterator import SeqIterator
 
 
@@ -41,22 +40,25 @@ def get_labels(uniq_loc, ambig_loc, unmap_loc):
 def main():
     """Parse arguments for the program."""
     now = datetime.datetime.now()
-    parser = argparse.ArgumentParser(description=('Create labels for '
-                                                  'bismark output.'),
-                                     formatter_class=argparse.
-                                     ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=('Create labels for '
+                     'bismark output.'),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("uniquely_mapped",
-                        type=str, help=("The location of the SAM file "
-                                        "for uniquely mapped reads."))
+                        type=str,
+                        help=("The location of the SAM file "
+                              "for uniquely mapped reads."))
     parser.add_argument("ambiguously_mapped",
-                        type=str, help=("The ambiguously mapped reads."))
-    parser.add_argument("unmapped_reads", type=str,
+                        type=str,
+                        help=("The ambiguously mapped reads."))
+    parser.add_argument("unmapped_reads",
+                        type=str,
                         help=('The location of the unmapped reads.'))
     args = parser.parse_args()
     get_labels(args.uniquely_mapped, args.ambiguously_mapped,
                args.unmapped_reads)
     later = datetime.datetime.now()
-    print("The process took time {}.".format(later-now), file=sys.stderr)
+    print("The process took time {}.".format(later - now), file=sys.stderr)
 
 
 if __name__ == "__main__":
