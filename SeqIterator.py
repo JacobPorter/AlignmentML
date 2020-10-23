@@ -44,7 +44,7 @@ class SeqIterator:
         return self
 
     def __next__(self):
-        return self.next()
+        return next(self)
 
     def next(self):
         if self.type == 0:  # FASTA
@@ -198,7 +198,7 @@ class SeqWriter:
                 separator = seq[3]
             self.seq_file.write("@" + seq[0] + "\n" + seq[1] + "\n" + separator + "\n" + seq[2] + "\n")
         elif self.type == 2: #SAM
-            if isinstance(seq, basestring): #For writing comments
+            if isinstance(seq, str): #For writing comments
                 self.seq_file.write(seq)
             else: #Write a record
                 line_string = ""
