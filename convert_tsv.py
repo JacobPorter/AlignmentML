@@ -44,7 +44,7 @@ def main():
     args = parser.parse_args()
     print(args, file=sys.stderr)
     sys.stderr.flush()
-    count = convert_feature_file(args.features_file)
+    count = convert_feature_file(args.features_file, args.id_list)
     toc = datetime.datetime.now()
     print("The process took time: {}".format(toc - tic), file=sys.stderr)
 
