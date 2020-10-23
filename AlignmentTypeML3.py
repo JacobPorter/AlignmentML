@@ -356,7 +356,7 @@ def doML(X,
         "Finished with making the features and labels matrices.\n")
     sys.stdout.flush()
     X, X_ids, feature_labels = X
-    sys.stdout.write("Checking the X matrx: {0}\n".format(X.shape))
+    sys.stdout.write("Checking the X matrix: {0}\n".format(X.shape))
     y = [float(y_dict[ide][0]) for ide in X_ids]
     checkNumPyMatrix(X)
     y = np.array(y, dtype='float32')
