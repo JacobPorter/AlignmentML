@@ -22,7 +22,7 @@ def convert_feature_file(features_file, id_file):
     Convert a file.
     """
     count = 0
-    id_list = open(id_file)
+    id_list = open(id_file, "w")
     with open(features_file) as fd:
         fd.readline()
         for line in fd:
@@ -30,6 +30,7 @@ def convert_feature_file(features_file, id_file):
             print(line[0], file=id_list)
             print("\t".join(map(lambda x: str(x).strip(), line[1:])), file=sys.stdout)
             count += 1
+    id_list.close()
     return count
 
 
