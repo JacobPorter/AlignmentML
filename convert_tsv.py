@@ -17,16 +17,18 @@ def convert_line(line):
     return line.split(",")
 
 
-def convert_feature_file(features_file):
+def convert_feature_file(features_file, id_file):
     """
     Convert a file.
     """
     count = 0
+    id_list = open(id_file)
     with open(features_file) as fd:
         fd.readline()
         for line in fd:
             line = convert_line(line)
-            print("\t".join(map(lambda x: str(x).strip(), line)), sys.stdout)
+            print(line[0], file=id_list)
+            print("\t".join(map(lambda x: str(x).strip(), line[1:])), file=sys.stdout)
             count += 1
     return count
 
@@ -38,6 +40,7 @@ def main():
     parser.add_argument("features_file",
                         type=str,
                         help=("A features file from AlignmentTypeML."))
+    parser.add_argument("-l", "--id_list", type=str, help=("The file to store sequence ids."), default="./id_list.txt")
     args = parser.parse_args()
     print(args, file=sys.stderr)
     sys.stderr.flush()
