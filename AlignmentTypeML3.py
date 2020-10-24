@@ -914,9 +914,9 @@ def getX(filelocation):
         X_ids.append(item[1])
     sys.stderr.write(str(X_ids[0:3]) + "\n")
     sys.stderr.write(str(X_features[0:3]) + "\n")
-    sys.stdout.write("Checking the X matrix.\n")
-    sys.stdout.write(str(checkNumericMatrix(X_features)) + "\n")
-    sys.stdout.write(str(checkNumericMatrix(X_features)) + "\n")
+    sys.stderr.write("Checking the X matrix.\n")
+    sys.stderr.write(str(checkNumericMatrix(X_features)) + "\n")
+    sys.stderr.write(str(checkNumericMatrix(X_features)) + "\n")
     return np.array(X_features, dtype='float32'), X_ids, feature_labels
 
 
