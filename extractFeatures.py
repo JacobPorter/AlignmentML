@@ -220,9 +220,9 @@ def simpleExtract(FASTQ_file):
         run_stats = longest_run(seq_seq)
         run_mean, run_variance = run_stats[0], run_stats[1]
         print("{}\t{}\t{}\t{}".format(ent, dust_score, run_mean, run_variance))
-    print("There were {} / {} reads excluded because of wildcards.".format(
-        wildcards, total),
-          file=sys.stderr)
+    sys.stderr.write(
+        "There were {} / {} reads excluded because of wildcards.\n".format(
+            wildcards, total))
 
 
 def main():
