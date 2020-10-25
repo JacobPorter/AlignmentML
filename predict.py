@@ -17,6 +17,8 @@ X = remove_columns.transform(X)
 for label in features_to_remove:
     feature_labels.remove(label)
 y_predict = model.predict(X)
-label_map = {0.0: "Unique", 1.0: "Ambig", 2.0: "Filt", 3.0: "Unmap"}
-for item in y_predict:
-    print(item, label_map[item], file=sys.stdout)
+y_probas = model.predict_proba(X)
+label_map = {0: "Unique", 1: "Ambig", 2: "Filt", 3: "Unmap"}
+for i in range(len(y_predict)):
+    item = int(y_predict[i])
+    print(X_ids[i], item, label_map[item], y_probas[i][item], file=sys.stdout)
