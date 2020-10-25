@@ -15,7 +15,7 @@ def remove_wildcards(fastq_file):
     count_n = 0
     for fastq_record in fastq_iter:
         count += 1
-        if "N" in fastq_record[0] or "n" in fastq_record[0]:
+        if "N" in fastq_record[1] or "n" in fastq_record[1]:
             count_n += 1
         else:
             fastq_writer.write(fastq_record)

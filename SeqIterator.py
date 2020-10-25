@@ -44,7 +44,7 @@ class SeqIterator:
         return self
 
     def __next__(self):
-        return next(self)
+        return self.next()
 
     def next(self):
         if self.type == 0:  # FASTA
