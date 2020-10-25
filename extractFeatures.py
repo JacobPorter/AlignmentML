@@ -197,6 +197,34 @@ def extractFeatures(FASTQ_file):
                      "in the file:\t%d\t%d\n" % (noNs, total))
 
 
+def simpleExtract(FASTQ_file):
+    def entropy(alpha_vector):
+        dna_count = Counter(alpha_vector)
+        ent = -1 * sum([
+            dna_count[base] * math.log(dna_count[base], 2)
+            for base in dna_count
+        ])
+        return ent
+
+    fastq_iter = SeqIterator.SeqIterator(FASTQ_file, file_type='fastq')
+    total = 0
+    wildcards = 0
+    for record in fastq_iter:
+        total += 1
+        seq_seq = record[1]
+        if "N" in seq_seq:
+            wildcards += 1
+            continue
+        ent = entropy(seq_seq)
+        dust_score = dust(seq_seq)
+        run_stats = longest_run(seq_seq)
+        run_mean, run_variance = run_stats[0], run_stats[1]
+        print("{}\t{}\t{}\t{}".format(ent, dust_score, run_mean, run_variance))
+    print("There were {} / {} reads excluded because of wildcards.".format(
+        wildcards, total),
+          file=sys.stderr)
+
+
 def main():
     now = datetime.datetime.now()
     usage = "usage: %prog [options] <FASTQ>"
@@ -207,6 +235,12 @@ def main():
                               version=version,
                               description=description,
                               epilog=epilog)
+    p.add_option("-s",
+                 "--simple",
+                 action="store_true",
+                 dest="simple",
+                 default=False,
+                 help="Use a simple set of features.")
     options, args = p.parse_args()
     if len(args) != 1:
         p.error("There must be one FASTQ files specified.  "
@@ -217,7 +251,10 @@ def main():
         p.error("The reads file does not exist or could not be accessed.")
     sys.stderr.write("ExtractFeatures was started on " + str(now) + "\n")
     sys.stderr.flush()
-    extractFeatures(FASTQ_file)
+    if options.simple:
+        simpleExtract(FASTQ_file)
+    else:
+        extractFeatures(FASTQ_file)
     later = datetime.datetime.now()
     sys.stderr.write("ExtractFeatures finished on " + str(later) +
                      " and took time: " + str(later - now) + "\n")

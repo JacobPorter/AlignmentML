@@ -28,9 +28,6 @@ from sklearn.svm import SVC, LinearSVC
 #from skopt import gp_minimize
 from skopt import BayesSearchCV
 from skopt.space import Categorical, Integer, Real
-"""
-TODO: Use Bayesian optimization to optimize hyperparameters
-"""
 
 verbose = 8
 SAVE_DIR = "./"
