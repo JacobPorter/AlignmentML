@@ -13,7 +13,8 @@ def examine_mapping(sam_file, predict_file):
     """Compute average alignment score and edit distance."""
     sam_iter = SeqIterator.SeqIterator(sam_file, file_type='sam')
     total_sam = 0
-    count = 0
+    count_as = 0
+    count_ed = 0
     avg_align_score = 0
     avg_edit_distance = 0
     pred_dict = defaultdict(lambda: [0] * 3)
@@ -33,10 +34,12 @@ def examine_mapping(sam_file, predict_file):
             edit_distance = None
         flag = int(record["FLAG"])
         if (int(pred[0]) == 0 or int(pred[0]) == 1) and flag != 4:
-            count += 1
+            count_as += 1
             avg_align_score += align_score
-            avg_edit_distance += edit_distance
-    return count, total_sam, avg_align_score / count, avg_edit_distance / count
+            if flag < 512:
+                avg_edit_distance += edit_distance
+                count_ed += 1
+    return count_as, count_ed, total_sam, avg_align_score / count_as, avg_edit_distance / count_ed
 
 
 def main():
@@ -54,13 +57,14 @@ def main():
     args = parser.parse_args()
     print(args, file=sys.stderr)
     sys.stderr.flush()
-    count, total_sam, avg_align_score, avg_edit_distance = examine_mapping(
+    count_as, count_ed, total_sam, avg_align_score, avg_edit_distance = examine_mapping(
         args.sam_file, args.predict_file)
     toc = datetime.datetime.now()
-    print(("There were {} / {} records processed.  "
+    print(("There were {} / {} records processed for the alignment score.  "
+           "There were {} / {} records processed for the edit distance.  "
            "The average alignment score was: {}, "
            "and the average edit distance was: {}.").format(
-               count, total_sam, avg_align_score, avg_edit_distance),
+               count_as, total_sam, count_ed, total_sam, avg_align_score, avg_edit_distance),
           file=sys.stderr)
     print("The process took time: {}".format(toc - tic), file=sys.stderr)
 
